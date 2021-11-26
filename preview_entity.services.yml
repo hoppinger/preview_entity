@@ -1,0 +1,4 @@
+services:
+  preview_entity.link_builder:
+    class: Drupal\preview_entity\LinkBuilder
+    arguments: ['@settings']

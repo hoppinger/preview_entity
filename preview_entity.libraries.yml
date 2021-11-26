@@ -1,0 +1,4 @@
+preview_entity:
+  css:
+    component:
+      css/preview_entity.css: {}

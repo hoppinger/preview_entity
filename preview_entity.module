@@ -1,0 +1,86 @@
+<?php
+
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityPublishedInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * @param array $build
+ * @param EntityInterface $entity
+ * @param EntityViewDisplayInterface $display
+ */
+function preview_entity_node_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
+  if ($display->getMode() == 'search_index') {
+    return;
+  }
+
+  /** @var \Drupal\preview_entity\LinkBuilderInterface $builder */
+  $builder = \Drupal::service('preview_entity.link_builder');
+
+  $published = TRUE;
+  if (($entity instanceof EntityPublishedInterface) && !$entity->isPublished()) {
+    $published = FALSE;
+  }
+  if (($entity instanceof RevisionableInterface) && !$entity->isDefaultRevision()) {
+    $published = FALSE;
+  }
+
+  $text_attributes = [];
+  if ($published) {
+    $link = $builder->buildPublishedLink($entity);
+    $text = 'This content is published. Go to @link to view it on the live site.';
+
+  } else {
+    $valid_until = $builder->determineValidUntil();
+    $valid_until_string = \Drupal::service('date.formatter')
+      ->format($valid_until, 'medium');
+
+    $link = $builder->buildPreviewLink($entity, $valid_until);
+    $text = 'This content is not published. Go to @link to preview it on the live site. This link will be valid until :date.';
+    $text_attributes[':date'] = $valid_until_string;
+  }
+
+  $build['preview_links'] = [
+    '#theme_wrappers' => ['preview_entity_container'],
+    '#text' => $text,
+    '#text_attributes' => $text_attributes,
+    '#attached' => ['library' => ['preview_entity/preview_entity']],
+    'link' => $link,
+    '#cache' => ['max-age' => 0],
+  ];
+}
+
+function preview_entity_theme() {
+  return [
+    'preview_entity_container' => [
+      'render element' => 'element',
+    ],
+  ];
+}
+
+function template_preprocess_preview_entity_container(&$variables) {
+  $element = $variables['element'];
+
+  $variables['link'] = $element['#children'];
+
+  $variables['text'] = $element['#text'];
+  $variables['text_attributes'] = !empty($element['#text_attributes']) ? $element['#text_attributes'] : [];
+  $variables['text_attributes']['@link'] = $variables['link'];
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+
+function preview_entity_field_widget_link_default_form_alter(&$element, &$form_state, $context) {
+  if($element['uri']['#type'] == 'entity_autocomplete') {
+    if(isset($element['uri']['#field_prefix'])){
+      $element['uri']['#description'] = t('Begin de titel van een entiteit te typen om deze te selecteren.');
+    }
+    else {
+      $element['uri']['#description'] = t('Begin de titel van een entiteit te typen om deze te selecteren. Een externe URL zoals %url is ook geldig.',  ['%url' => 'http://example.com']);
+    }
+  }
+}

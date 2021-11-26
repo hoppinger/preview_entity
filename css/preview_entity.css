@@ -1,0 +1,9 @@
+.container--preview-entity {
+  border: 1px solid #c0c0c0;
+  background-color: #fcfcfa;
+  border-radius: 2px;
+  padding: 18px;
+  min-width: 0;
+  position: relative;
+  margin: 0 0 1em;
+}
