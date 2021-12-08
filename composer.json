@@ -1,0 +1,23 @@
+{
+  "name": "hoppinger/preview_entity",
+  "description": "Drupal module to provide preview functionality to the Headless CMS",
+  "type": "drupal-module",
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "homepage": "https://github.com/hoppinger/preview_entity",
+  "authors": [
+    {
+      "name": "Rolf van de Krol",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Ashwini Mone",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Amit Ajgaonkar",
+      "role": "Maintainer"
+    }
+  ],
+  "require": {}
+}
